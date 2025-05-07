@@ -1,0 +1,81 @@
+<div class="row">
+    <div class="col-md-5">
+        {% if producto.imagen %}
+        <img src="{{ producto.imagen.url }}" class="img-fluid rounded" alt="{{ producto.nombre }}">
+        {% else %}
+        <div class="no-image-placeholder-large">
+            <i class="fas fa-image"></i>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-7">
+        <h1 class="mb-3">{{ producto.nombre }}</h1>
+        <p class="text-muted">Categoría: {{ producto.categoria.nombre }}</p>
+        <div class="mb-3">
+            <span class="badge bg-{{ producto.stock > 0|yesno:'success,danger' }}">
+                {{ producto.stock > 0|yesno:'En stock,Agotado' }}
+            </span>
+            <span class="ms-2">Disponibles: {{ producto.stock }}</span>
+        </div>
+        <div class="price-tag mb-3">
+            <span class="price-label">Precio:</span>
+            <span class="price-value">${{ producto.precio }}</span>
+        </div>
+        <div class="product-description mb-4">
+            <h4>Descripción:</h4>
+            <p>{{ producto.descripcion }}</p>
+        </div>
+        
+        {% if user.is_authenticated and user.is_staff %}
+        <div class="mb-4">
+            <a href="{% url 'admin:app_principal_producto_change' producto.id %}" class="btn btn-warning">
+                <i class="fas fa-edit me-1"></i>Editar Producto
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Sección de comentarios -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h3 class="mb-4">Comentarios</h3>
+        
+        {% if user.is_authenticated %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Deja tu comentario</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-2">Enviar comentario</button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info mb-4">
+            <a href="{% url 'login' %}">Inicia sesión</a> para dejar un comentario.
+        </div>
+        {% endif %}
+        
+        <div class="comentarios-container">
+            {% for comentario in producto.comentarios.all %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="card-subtitle text-primary mb-0">
+                            <i class="fas fa-user-circle me-2"></i>{{ comentario.usuario.username }}
+                        </h6>
+                        <small class="text-muted">{{ comentario.fecha|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    <p class="card-text">{{ comentario.texto }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert alert-light">
+                No hay comentarios todavía. ¡Sé el primero en comentar!
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
